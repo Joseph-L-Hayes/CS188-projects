@@ -410,7 +410,7 @@ class ParticleFilter(InferenceModule):
             # particleBeliefs.normalize()
             # self.beliefs = particleBeliefs
 
-            for i in range(len(particleBeliefs)):
+            for i in range(self.numParticles):
                 newDist = particleBeliefs.sample()
                 self.particles[i] = newDist
 
