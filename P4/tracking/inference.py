@@ -365,17 +365,20 @@ class ParticleFilter(InferenceModule):
         self.particles = []
         # testSet = set()
         "*** YOUR CODE HERE question 5 ***"
-        # for i in range(self.numParticles): #this may be problem for Q6...
-        #     # testSet.add(self.legalPositions[i % len(self.legalPositions)])
+        for i in range(self.numParticles):
+            self.particles += [self.legalPositions[i % len(self.legalPositions)]]
+
         # print(self.legalPositions)
         # self.particles += [self.legalPositions for i in range(self.numParticles / len(self.legalPositions))]
         # for pos in self.legalPositions:
         #     self.particles += [pos]
         # # self.particles = list(testSet)
-        particleSize = int(self.numParticles / len(self.legalPositions))
-        for pos in self.legalPositions:
-            for i in range(particleSize):
-                self.particles += [pos]
+
+        # particleSize = int(self.numParticles / len(self.legalPositions))
+        # for pos in self.legalPositions:
+        #     for i in range(particleSize):
+        #         self.particles += [pos]
+        # print("DEBUG",self.numParticles,len(self.particles))
 
     def observeUpdate(self, observation, gameState):
         """
@@ -400,11 +403,12 @@ class ParticleFilter(InferenceModule):
             prob = self.getObservationProb(observation, pacmanPos, partPos, jailPos)
             particleBeliefs[partPos] += prob
 
+
         if particleBeliefs.total() == 0:
             self.initializeUniformly(gameState)
         else:
-            particleBeliefs.normalize()
-            self.beliefs = particleBeliefs
+            # particleBeliefs.normalize()
+            # self.beliefs = particleBeliefs
 
             for i in range(len(particleBeliefs)):
                 newDist = particleBeliefs.sample()
@@ -418,7 +422,12 @@ class ParticleFilter(InferenceModule):
         gameState.
         """
         "*** YOUR CODE HERE question 7 ***"
-        raiseNotDefined()
+        newParticles = []
+
+        for oldPos in self.particles:
+            newParticles += [self.getPositionDistribution(gameState, oldPos).sample()]
+
+        self.particles = newParticles
 
     def getBeliefDistribution(self):
         """
@@ -429,10 +438,10 @@ class ParticleFilter(InferenceModule):
         This function should return a normalized distribution.
         """
         "*** YOUR CODE HERE question 5 ***"
-        beliefs = Counter()
+        beliefs = DiscreteDistribution()
 
-        for pos in self.particles:
-            beliefs[pos] = 1.0
+        for part in self.particles:
+            beliefs[part] += 1
 
         beliefs.normalize()
 
