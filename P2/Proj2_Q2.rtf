@@ -1,0 +1,196 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf600
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 class AlphaBetaAgent(MultiAgentSearchAgent):\
+    """\
+    Your minimax agent with alpha-beta pruning (question 3)\
+    """\
+\
+    def getAction(self, gameState): #returns an action\
+        """\
+        Returns the minimax action using self.depth and self.evaluationFunction\
+\
+        """\
+        "*** YOUR CODE HERE ***"\
+\
+        def value(gameState, agentIndex, depth, alpha, beta):\
+\
+            if gameState.isLose() or gameState.isWin() or depth == 0:\
+                return (self.evaluationFunction(gameState), Directions.STOP)\
+\
+            if agentIndex == 0:\
+                return maxAgent(gameState, agentIndex, depth - 1, alpha, beta)\
+\
+            else:\
+                return minAgent(gameState, agentIndex, depth, alpha, beta)\
+\
+        def minAgent(state, index, depth, alpha, beta):\
+\
+            minVal = v = float("inf")\
+            minActions = state.getLegalActions(index)\
+            bestAction = Directions.STOP\
+\
+            for action in minActions:\
+                minState = state.generateSuccessor(index, action)\
+                minVal = min(v, value(minState, (index + 1) % state.getNumAgents(), depth, alpha, beta)[0])\
+\
+                if minVal < v:\
+                    bestAction = action\
+                    v = minVal\
+\
+                beta = min(beta, v)\
+\
+                if beta < alpha: #You must not prune on equality in order to match the set of states explored by our autograder.\
+                    return (v, bestAction)\
+\
+            return (minVal, bestAction)\
+\
+        def maxAgent(state, index, depth, alpha, beta):\
+\
+            if state.isLose() or state.isWin() or depth == 0:\
+                return (self.evaluationFunction(state), Directions.STOP)\
+\
+            maxVal = v = float("-inf")\
+            maxActions = state.getLegalActions(index)\
+            bestAction = Directions.STOP\
+\
+            for action in maxActions:\
+                maxState = state.generateSuccessor(index, action)\
+                maxVal = max(v, value(maxState, (index + 1) % state.getNumAgents(), depth, alpha, beta)[0])\
+\
+                if maxVal > v:\
+                    bestAction = action\
+                    v = maxVal\
+\
+                alpha = max(alpha, v)\
+\
+                if beta < alpha: #You must not prune on equality in order to match the set of states explored by our autograder.\
+                    return (v, bestAction) \
+\
+            return (maxVal, bestAction)\
+\
+        return maxAgent(gameState, self.index, self.depth, float("-inf"), float("inf"))[1]\
+\
+\
+    # def minAgent(gameState, targetDepth, agentIndex):\
+        #     minV = float("inf")\
+        #     # print("DEPTHmin:", targetDepth)\
+        #     if gameState.isLose() or gameState.isWin() or targetDepth == 0:\
+        #         return self.evaluationFunction(gameState)\
+        #     minLegalActions = gameState.getLegalActions(agentIndex)\
+        #     # ghostState = [gameState.generateSuccessor(agentIndex, action) for action in legalActions ]\
+        #     for action in minLegalActions:\
+        #         agentState = gameState.generateSuccessor(agentIndex, action)\
+        #         minV = max(minV, maxAgent(agentState, targetDepth - 1, agentIndex + 1))\
+        #\
+        #     return minV\
+        #\
+        # def maxAgent(gameState, targetDepth, agentIndex):\
+        #     maxV = -float("inf")\
+        #     # print("DEPTHmax:", targetDepth)\
+        #     if gameState.isLose() or gameState.isWin() or targetDepth == 0:\
+        #         return self.evaluationFunction(gameState)\
+        #     maxLegalActions = gameState.getLegalActions(0)\
+        #     for action in maxLegalActions:\
+        #         agentState = gameState.generateSuccessor(0, action)\
+        #         maxV = min(maxV, minAgent(agentState, targetDepth, agentIndex))\
+        #\
+        #     return maxV\
+        # #idea: write value function to switch between different min/max agents\
+        # #simplify the max and min functions\
+        # #if pacman do max, if ghost (1 and up) do min\
+        #\
+        # legalActions = gameState.getLegalActions(0)\
+        # score = 0\
+        # bestScore = 0\
+        # prevScore = 0\
+        # depth = self.depth\
+        # bestMove = Directions.STOP\
+        #\
+        # for action in legalActions:\
+        #     pacAction = gameState.generateSuccessor(0, action) #get a state post move\
+        #     # if pacAction.isLose() or pacAction.isWin() or depth == 0:\
+        #     #     return self.evaluationFunction(pacAction)\
+        #     score = minAgent(pacAction, depth, 1) #starting with ghost/min, score the move\
+        #     if score > prevScore:\
+        #         bestScore = score\
+        #         bestMove = action\
+        #         prevScore = score\
+        # return bestMove\
+\
+        ########################################################################\
+\
+        # miniMaxScore = 0\
+        # targetDepth = self.depth #changes depending on test\
+        # currDepth = 0\
+        # # evalFunc = scoreEvaluationFunction(gameState) #want to call this on terminal node\
+        # pacActions = gameState.getLegalActions(0)\
+        # maxStates = [] #list of successor gameStates ['West', 'Stop', 'East', 'South'] OR ['West', 'Stop', 'East']\
+        # minStates = [] #list of ghost actions HOW TO STORE?\
+        # #PIAZZA: check winning or losing after every MOVE!\
+\
+\
+BELOW BEING DEBUGGED:\
+\
+    def value(gameState, agentIndex, depth, numGhosts=1):\
+            # depth -= 1\
+            # print("DEPTHv:", depth)\
+            if gameState.isLose() or gameState.isWin() or depth <= 0:\
+                return (self.evaluationFunction(gameState), Directions.STOP)\
+\
+            if agentIndex == 0:\
+                return maxAgent(gameState, agentIndex + 1, depth)\
+\
+            elif (gameState.getNumAgents() - 1) > 1:\
+                return maxAgent(gameState, agentIndex + 1, depth - 1)\
+            else:\
+                return minAgent(gameState, agentIndex, depth)\
+            #change value to return a state based on max/min\
+\
+        def minAgent(state, index, depth, numGhosts=1): #return a min value\
+            # print("DEPTHmin:", depth)\
+            depth -= 1 #leave here!\
+            v = float("inf")\
+            minVal = 0\
+            minActions = state.getLegalActions(index)\
+            bestAction = Directions.STOP\
+\
+            for action in minActions:\
+                minState = state.generateSuccessor(index, action)\
+                minVal = min(v, value(minState, index, depth)[0]) #agent index was 0\
+                if minVal > v:\
+                    bestAction = action\
+                    v = minVal\
+\
+            return (minVal, bestAction)\
+\
+        def maxAgent(state, index, depth, numGhosts=1):\
+            # print("DEPTHmax", depth)\
+\
+            # if gameState.isLose() or gameState.isWin() or depth == 0:\
+            #     return (self.evaluationFunction(gameState), Directions.STOP)\
+            v = float("-inf")\
+            maxVal = 0\
+            maxActions = state.getLegalActions(index)\
+            bestAction = Directions.STOP\
+\
+            for action in maxActions:\
+                maxState = state.generateSuccessor(index, action)\
+                maxVal = max(v, value(maxState, index, depth)[0])\
+\
+                #are v and maxVal being handled correctly? looks okay...\
+                if maxVal > v:\
+                    bestAction = action\
+                    v = maxVal\
+\
+            return (maxVal, bestAction) #change to return a VALUE\
+\
+        return value(gameState, self.index, self.depth, gameState.getNumAgents - 1)[1]\
+\
+MN^2 + 1 for state space in Q1? The disease is deterministic so we know where it will go. Track it\'92s position and the time-step will give the location and the diseased squares. This is more computational but makes the state space smaller.\
+\
+}
