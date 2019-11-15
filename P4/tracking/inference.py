@@ -403,7 +403,6 @@ class ParticleFilter(InferenceModule):
             prob = self.getObservationProb(observation, pacmanPos, partPos, jailPos)
             particleBeliefs[partPos] += prob
 
-
         if particleBeliefs.total() == 0:
             self.initializeUniformly(gameState)
         else:
@@ -515,7 +514,7 @@ class JointParticleFilter(ParticleFilter):
         "*** YOUR CODE HERE question 9 ***"
         particleBeliefs = DiscreteDistribution()
         pacmanPos = gameState.getPacmanPosition()
-        
+
         for partPos in self.particles:
             prob = 1
             for i in range(self.numGhosts):
@@ -542,13 +541,14 @@ class JointParticleFilter(ParticleFilter):
             newParticle = list(oldParticle)  # A list of ghost positions
 
             # now loop through and update each entry in newParticle...
-            "*** YOUR CODE HERE ***"
-            raiseNotDefined()
-
+            "*** YOUR CODE HERE question 10 ***"
+            for i in range(self.numGhosts):
+                newParticleDist = self.getPositionDistribution(gameState, oldParticle, i, self.ghostAgents[i])
+                newParticle[i] = newParticleDist.sample()
+            # raiseNotDefined()
             """*** END YOUR CODE HERE ***"""
             newParticles.append(tuple(newParticle))
         self.particles = newParticles
-
 
 # One JointInference module is shared globally across instances of MarginalInference
 jointInference = JointParticleFilter()
