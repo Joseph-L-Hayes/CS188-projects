@@ -473,8 +473,13 @@ class JointParticleFilter(ParticleFilter):
         """
         self.particles = []
         "*** YOUR CODE HERE question 8 ***"
-        # for i in range(self.numParticles):
-        #     self.particles += [self.legalPositions[i % len(self.legalPositions)]]
+        sample = itertools.product(self.legalPositions, repeat = self.numGhosts) #must use repeat = x because the signature uses *args
+        sample = list(sample)
+        random.shuffle(sample)
+
+        for i in range(self.numParticles):
+            self.particles += [sample[i % len(sample)]]
+
         # raiseNotDefined()
 
     def addGhostAgent(self, agent):
