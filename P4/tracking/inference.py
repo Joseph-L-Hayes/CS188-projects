@@ -363,22 +363,10 @@ class ParticleFilter(InferenceModule):
         self.particles for the list of particles.
         """
         self.particles = []
-        # testSet = set()
         "*** YOUR CODE HERE question 5 ***"
         for i in range(self.numParticles):
             self.particles += [self.legalPositions[i % len(self.legalPositions)]]
 
-        # print(self.legalPositions)
-        # self.particles += [self.legalPositions for i in range(self.numParticles / len(self.legalPositions))]
-        # for pos in self.legalPositions:
-        #     self.particles += [pos]
-        # # self.particles = list(testSet)
-
-        # particleSize = int(self.numParticles / len(self.legalPositions))
-        # for pos in self.legalPositions:
-        #     for i in range(particleSize):
-        #         self.particles += [pos]
-        # print("DEBUG",self.numParticles,len(self.particles))
 
     def observeUpdate(self, observation, gameState):
         """
