@@ -27,13 +27,6 @@ class PerceptronModel(object):
         Returns: a node containing a single number (the score)
         """
         "*** YOUR CODE HERE question 1 ***"
-        # For the perceptron, the output labels will be either 1 or −1, meaning that
-        # data points (x, y) from the dataset will have y be a nn.Constant node that
-        # contains either 1 or −1 as its entries.
-        #--------------
-        # We have already initialized the perceptron weights self.w to be a 1×dimensions
-        # parameter node. The provided code will include a bias feature inside x when needed,
-        # so you will not need a separate parameter for the bias.
         score = nn.DotProduct(self.w, x)
 
         return score
@@ -64,6 +57,7 @@ class PerceptronModel(object):
 
         #The input features x and the correct label y are provided in the form of nn.Constant nodes
         #weights are directions
+        
         while True:
             trainingComplete = True
 
