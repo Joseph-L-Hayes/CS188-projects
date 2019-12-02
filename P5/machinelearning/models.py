@@ -26,7 +26,18 @@ class PerceptronModel(object):
             x: a node with shape (1 x dimensions)
         Returns: a node containing a single number (the score)
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 1 ***"
+        # For the perceptron, the output labels will be either 1 or −1, meaning that
+        # data points (x, y) from the dataset will have y be a nn.Constant node that
+        # contains either 1 or −1 as its entries.
+        #--------------
+        # We have already initialized the perceptron weights self.w to be a 1×dimensions
+        # parameter node. The provided code will include a bias feature inside x when needed,
+        # so you will not need a separate parameter for the bias.
+        score = nn.DotProduct(self.w, x)
+
+        return score
+
 
     def get_prediction(self, x):
         """
@@ -34,13 +45,22 @@ class PerceptronModel(object):
 
         Returns: 1 or -1
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 1 ***"
+        dProduct = nn.as_scalar(self.run(x))
+
+        if dProduct < 0:
+            return -1
+        else:
+            return 1
 
     def train(self, dataset):
         """
         Train the perceptron until convergence.
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 1 ***"
+        # In this project, the only way to change the value of a parameter is by
+        # calling parameter.update(direction, multiplier)
+        #loop over the dataset, get_prediction() and compare to what the data is and update
 
 class RegressionModel(object):
     """
