@@ -51,13 +51,6 @@ class PerceptronModel(object):
         Train the perceptron until convergence.
         """
         "*** YOUR CODE HERE question 1 ***"
-        # In this project, the only way to change the value of a parameter is by
-        # calling parameter.update(direction, multiplier)
-        #loop over the dataset, get_prediction() and compare to what the data is and update
-
-        #The input features x and the correct label y are provided in the form of nn.Constant nodes
-        #weights are directions
-
         while True:
             trainingComplete = True
             data = dataset.iterate_once(1)
