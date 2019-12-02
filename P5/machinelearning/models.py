@@ -62,6 +62,21 @@ class PerceptronModel(object):
         # calling parameter.update(direction, multiplier)
         #loop over the dataset, get_prediction() and compare to what the data is and update
 
+        #The input features x and the correct label y are provided in the form of nn.Constant nodes
+        #weights are directions
+        while True:
+            trainingComplete = True
+
+            for feature, label in dataset.iterate_once(1):
+
+                if nn.as_scalar(label) != self.get_prediction(feature):
+
+                    nn.Parameter.update(self.w, feature, nn.as_scalar(label))
+                    trainingComplete = False
+
+            if trainingComplete:
+                break
+
 class RegressionModel(object):
     """
     A neural network model for approximating a function that maps from real
