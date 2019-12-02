@@ -57,14 +57,14 @@ class PerceptronModel(object):
 
         #The input features x and the correct label y are provided in the form of nn.Constant nodes
         #weights are directions
-        
+
         while True:
             trainingComplete = True
+            data = dataset.iterate_once(1)
 
-            for feature, label in dataset.iterate_once(1):
+            for feature, label in data:
 
                 if nn.as_scalar(label) != self.get_prediction(feature):
-
                     nn.Parameter.update(self.w, feature, nn.as_scalar(label))
                     trainingComplete = False
 
