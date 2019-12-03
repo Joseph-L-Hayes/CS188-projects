@@ -178,7 +178,20 @@ class DigitClassificationModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 3 ***"
+        self.learnRate = -.002
+        self.batch_size = 1
+        d = 1
+        h = 1000
+
+        self.m0 = nn.Parameter(784, d)
+        self.b0 = nn.Parameter(1, 1)
+        self.m1 = nn.Parameter(1, 784)
+        self.b1 = nn.Parameter(1, 784)
+
+        # Ignore below, used for extra layer, needs tuning.
+        self.m2 = nn.Parameter(784, 1)
+        self.b2 = nn.Parameter(1, 1)
 
     def run(self, x):
         """
@@ -194,7 +207,26 @@ class DigitClassificationModel(object):
             A node with shape (batch_size x 10) containing predicted scores
                 (also called logits)
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 3 ***"
+        # print("X",x) 1 x 784
+        xm0 = nn.Linear(x, self.m0)
+        print("xm0", xm0)
+        bias0 = nn.AddBias(xm0, self.b0)
+        print("bias0", bias0)
+        relu0 = nn.ReLU(bias0)
+        print("relu0", relu0)
+        xm1 = nn.Linear(relu0, self.m1)
+        print("xm1", xm1)
+        bias1 = nn.AddBias(self.b1, xm1)
+        print("bias1", bias1)
+
+        # relu1 = nn.ReLU(bias1)
+        xm2 = nn.Linear(bias1, self.m2)
+        print("xm2", xm2)
+        final = nn.AddBias(xm2, self.b2)
+        print("final", final)
+
+        return final #shape errors
 
     def get_loss(self, x, y):
         """
@@ -209,13 +241,28 @@ class DigitClassificationModel(object):
             y: a node with shape (batch_size x 10)
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 3 ***"
+        return nn.SquareLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 3 ***"
+        while True:
+            for feature, label in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(feature, label)
+                grad_wrt_m0, grad_wrt_b0, grad_wrt_m1, grad_wrt_m2, grad_wrt_b2 = nn.gradients(loss, [self.m0, self.b0, self.m1, self.m2, self.b2])
+
+                self.m0.update(grad_wrt_m0, self.learnRate)
+                self.b0.update(grad_wrt_b0, self.learnRate)
+                self.m1.update(grad_wrt_m1, self.learnRate)
+                self.m2.update(grad_wrt_m2, self.learnRate)
+                self.b2.update(grad_wrt_b2, self.learnRate)
+
+            if nn.as_scalar(self.get_loss(feature, label)) <= .02:
+                break
+
 
 class LanguageIDModel(object):
     """
