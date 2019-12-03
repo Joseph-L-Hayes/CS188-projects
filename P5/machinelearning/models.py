@@ -58,7 +58,7 @@ class PerceptronModel(object):
             for feature, label in data:
 
                 if nn.as_scalar(label) != self.get_prediction(feature):
-                    nn.Parameter.update(self.w, feature, nn.as_scalar(label))
+                    self.w.update(feature, nn.as_scalar(label))
                     trainingComplete = False
 
             if trainingComplete:
@@ -72,7 +72,28 @@ class RegressionModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        # Use nn.SquareLoss as your loss
+        # ReLU: rectified linear unit, f(x) = 0 if x < 0 and x otherwise
+        #functions to use:
+            #nn.Linear(features, weights)
+                #returns a node with shape (batch_size x output_features)
+
+            #nn.ReLU(x),
+                #x: a Node with shape (batch_size x num_features)
+                #returns a Node with the same shape as x, but no negative entries
+
+            #nn.AddBias(features, bias)
+                #features: a Node with shape (batch_size x num_features)
+                #bias: a Node with shape (1 x num_features)
+                #returns a Node with shape (batch_size x num_features)
+
+            #nn.Linear (again)
+        "*** YOUR CODE HERE question 2 ***"
+        self.learnRate = -.005
+        self.m0 = nn.Parameter(1, 1)
+        self.b0 = nn.Parameter(1, 1)
+        self.m1 = nn.Parameter(1, 1)
+        self.b1 = nn.Parameter(1, 1)
 
     def run(self, x):
         """
@@ -83,7 +104,17 @@ class RegressionModel(object):
         Returns:
             A node with shape (batch_size x 1) containing predicted y-values
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 2 ***"
+        # print("M0", self.m0)
+        # print("M1", self.m1)
+        # print("x", x)
+        xm0 = nn.Linear(x, self.m0)
+        bias0 = nn.AddBias(xm0, self.b0)
+        relu0 = nn.ReLU(bias0)
+        xm1 = nn.Linear(relu0, self.m1)
+        final = nn.AddBias(xm1, self.b1)
+
+        return final
 
     def get_loss(self, x, y):
         """
@@ -95,13 +126,27 @@ class RegressionModel(object):
                 to be used for training
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 2 ***"
+        return nn.SquareLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 2 ***"
+        while True:
+            for feature, label in dataset.iterate_once(1):
+                loss = self.get_loss(feature, label)
+                grad_wrt_m0, grad_wrt_b0, grad_wrt_m1 = nn.gradients(loss, [self.m0, self.b0, self.m1])
+                # print("WEIGHTS:", grad_wrt_m0, grad_wrt_b0, grad_wrt_m1)
+
+                self.m0.update(grad_wrt_m0, self.learnRate)
+                self.b0.update(grad_wrt_b0, self.learnRate)
+                self.m1.update(grad_wrt_m1, self.learnRate)
+
+            if nn.as_scalar(self.get_loss(feature, label)) <= .02:
+                break
+
 
 class DigitClassificationModel(object):
     """
