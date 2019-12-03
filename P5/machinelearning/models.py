@@ -89,10 +89,13 @@ class RegressionModel(object):
 
             #nn.Linear (again)
         "*** YOUR CODE HERE question 2 ***"
-        self.learnRate = -.005
-        self.m0 = nn.Parameter(1, 1)
-        self.b0 = nn.Parameter(1, 1)
-        self.m1 = nn.Parameter(1, 1)
+        self.learnRate = -.001
+        d = 1
+        h = 1000
+
+        self.m0 = nn.Parameter(d, h)
+        self.b0 = nn.Parameter(1, h)
+        self.m1 = nn.Parameter(h, 1)
         self.b1 = nn.Parameter(1, 1)
 
     def run(self, x):
@@ -114,7 +117,7 @@ class RegressionModel(object):
         xm1 = nn.Linear(relu0, self.m1)
         final = nn.AddBias(xm1, self.b1)
 
-        return final
+        return final #xm1
 
     def get_loss(self, x, y):
         """
@@ -135,7 +138,7 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE question 2 ***"
         while True:
-            for feature, label in dataset.iterate_once(1):
+            for feature, label in dataset.iterate_once(2):
                 loss = self.get_loss(feature, label)
                 grad_wrt_m0, grad_wrt_b0, grad_wrt_m1 = nn.gradients(loss, [self.m0, self.b0, self.m1])
                 # print("WEIGHTS:", grad_wrt_m0, grad_wrt_b0, grad_wrt_m1)
