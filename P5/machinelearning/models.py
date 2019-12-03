@@ -89,14 +89,22 @@ class RegressionModel(object):
 
             #nn.Linear (again)
         "*** YOUR CODE HERE question 2 ***"
-        self.learnRate = -.001
+        self.learnRate = -.002 #best so far -.002
+        self.batch_size = 1 #best so far 1
         d = 1
-        h = 1000
+        h = 1000 #best so far 1000
+        #error(10000, -.002) = 0.011310
+        #error(1000, -.002) = 0.009555
+        #error(100, -.002) = 0.012887
 
         self.m0 = nn.Parameter(d, h)
         self.b0 = nn.Parameter(1, h)
         self.m1 = nn.Parameter(h, 1)
         self.b1 = nn.Parameter(1, 1)
+
+        # Ignore below, used for extra layer, needs tuning.
+        self.m2 = nn.Parameter(1, 1)
+        self.b2 = nn.Parameter(1, 1)
 
     def run(self, x):
         """
@@ -108,16 +116,18 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE question 2 ***"
-        # print("M0", self.m0)
-        # print("M1", self.m1)
-        # print("x", x)
         xm0 = nn.Linear(x, self.m0)
         bias0 = nn.AddBias(xm0, self.b0)
         relu0 = nn.ReLU(bias0)
         xm1 = nn.Linear(relu0, self.m1)
-        final = nn.AddBias(xm1, self.b1)
+        bias1 = nn.AddBias(xm1, self.b1)
+        ### extra layer below ###
+        # relu1 = nn.ReLU(bias1)
+        # xm2 = nn.Linear(relu1, self.m2)
+        # final = nn.AddBias(xm2, self.b2)
+        # training another layer makes a smoother curve but needs more tuning...
 
-        return final #xm1
+        return bias1
 
     def get_loss(self, x, y):
         """
@@ -138,14 +148,15 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE question 2 ***"
         while True:
-            for feature, label in dataset.iterate_once(2):
+            for feature, label in dataset.iterate_once(self.batch_size):
                 loss = self.get_loss(feature, label)
-                grad_wrt_m0, grad_wrt_b0, grad_wrt_m1 = nn.gradients(loss, [self.m0, self.b0, self.m1])
-                # print("WEIGHTS:", grad_wrt_m0, grad_wrt_b0, grad_wrt_m1)
+                grad_wrt_m0, grad_wrt_b0, grad_wrt_m1, grad_wrt_m2, grad_wrt_b2 = nn.gradients(loss, [self.m0, self.b0, self.m1, self.m2, self.b2])
 
                 self.m0.update(grad_wrt_m0, self.learnRate)
                 self.b0.update(grad_wrt_b0, self.learnRate)
                 self.m1.update(grad_wrt_m1, self.learnRate)
+                # self.m2.update(grad_wrt_m2, self.learnRate)
+                # self.b2.update(grad_wrt_b2, self.learnRate)
 
             if nn.as_scalar(self.get_loss(feature, label)) <= .02:
                 break
