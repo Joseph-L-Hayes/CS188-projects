@@ -161,7 +161,6 @@ class RegressionModel(object):
             if nn.as_scalar(self.get_loss(feature, label)) <= .02:
                 break
 
-
 class DigitClassificationModel(object):
     """
     A model for handwritten digit classification using the MNIST dataset.
