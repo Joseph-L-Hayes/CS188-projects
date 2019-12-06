@@ -150,7 +150,8 @@ class RegressionModel(object):
         while True:
             for feature, label in dataset.iterate_once(self.batch_size):
                 loss = self.get_loss(feature, label)
-                grad_wrt_m0, grad_wrt_b0, grad_wrt_m1, grad_wrt_m2, grad_wrt_b2 = nn.gradients(loss, [self.m0, self.b0, self.m1, self.m2, self.b2])
+                weightList = [self.m0, self.b0, self.m1, self.m2, self.b2]
+                grad_wrt_m0, grad_wrt_b0, grad_wrt_m1, grad_wrt_m2, grad_wrt_b2 = nn.gradients(loss, weightList)
 
                 self.m0.update(grad_wrt_m0, self.learnRate)
                 self.b0.update(grad_wrt_b0, self.learnRate)
@@ -243,7 +244,8 @@ class DigitClassificationModel(object):
         while True:
             for feature, label in dataset.iterate_once(self.batch_size):
                 loss = self.get_loss(feature, label)
-                grad_wrt_m0, grad_wrt_b0, grad_wrt_m1, grad_wrt_m2, grad_wrt_b2 = nn.gradients(loss, [self.m0, self.b0, self.m1, self.m2, self.b2])
+                weightList = [self.m0, self.b0, self.m1, self.m2, self.b2]
+                grad_wrt_m0, grad_wrt_b0, grad_wrt_m1, grad_wrt_m2, grad_wrt_b2 = nn.gradients(loss, weightList)
 
                 self.m0.update(grad_wrt_m0, self.learnRate)
                 self.b0.update(grad_wrt_b0, self.learnRate)
@@ -276,9 +278,34 @@ class LanguageIDModel(object):
         # You can refer to self.num_chars or len(self.languages) in your code
         self.num_chars = 47
         self.languages = ["English", "Spanish", "Finnish", "Dutch", "Polish"]
-
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 4 ***"
+        self.batch_size = 10
+        self.learn_rate = -.005
+        self.h = 50
+        self.d = len(self.languages)
+
+        self.w = nn.Parameter(self.num_chars, self.h)
+        self.w_hidden1 = nn.Parameter(self.h, self.h)
+        self.w_hidden2 = nn.Parameter(self.h, self.d)
+
+        #added another layer
+        #batch = 10, learn = -.005, h = 5: 72%
+        #batch = 10, learn = -.005, h=50: 78% (second run): 78% best, 3: 77%
+        #batch = 10, learn = -.005, h=100: 75%
+        #batch = 10, learn = -.002, h=50: 75%
+        #batch = 10, learn = -.009, h=50: 77%
+        #batch = 15, learn = -.005, h=50: 75
+        #batch = 10, learn = -.005, h=40: 77%
+        #batch = 20, learn = -.005, h=50: 76%
+        #batch = 10, learn = -.005, h=10: 74%
+
+        #batch = 15, learn = -.005, h=50: 77%
+        #batch = 5, learn= -.005, h=50: 79%
+        #batch = 5, learn= -.009, h=50: 74%
+        #batch = 5, learn= -.005, h=50: 79% (second run): 78.4% best
+        #batch = 5, learn= -.004, h=50: 76
+
 
     def run(self, xs):
         """
@@ -309,7 +336,20 @@ class LanguageIDModel(object):
             A node with shape (batch_size x 5) containing predicted scores
                 (also called logits)
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 4 ***"
+        # h1=finitial(x0),
+        # print("XS", xs[0]) #1x47
+        # h1 = nn.Linear(xs[0]) #output vector
+        #Next, we’ll combine the output of the previous step with the next letter
+        #in the word, generating a vector summary of the the first two letters of the word.
+        # h2 = nn.Linear(h1, xs[1])
+        #This pattern continues for all letters in the input word, where the hidden
+        #state at each step summarizes all the letters the network has processed thus far:
+        z = nn.Linear(xs[0], self.w)
+        for x in xs:
+            z = nn.Add(nn.Linear(x, self.w), nn.Linear(z, self.w_hidden1))
+
+        return nn.Linear(z, self.w_hidden2)
 
     def get_loss(self, xs, y):
         """
@@ -325,10 +365,29 @@ class LanguageIDModel(object):
             y: a node with shape (batch_size x 5)
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 4 ***"
+        return nn.SoftmaxLoss(self.run(xs), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE question 4 ***"
+        epoch = 0
+        while True:
+            epoch += 1
+
+            for feature, label in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(feature,label)
+                weightList = [self.w, self.w_hidden1, self.w_hidden2]
+                grad_wrt_w, grad_wrt_hidden1, grad_wrt_hidden2 = nn.gradients(loss, weightList)
+
+                self.w.update(grad_wrt_w, self.learn_rate)
+                self.w_hidden1.update(grad_wrt_hidden1, self.learn_rate)
+                self.w_hidden2.update(grad_wrt_hidden2, self.learn_rate)
+
+            if dataset.get_validation_accuracy() > .82:
+                return
+
+            if epoch == 30:
+                break
