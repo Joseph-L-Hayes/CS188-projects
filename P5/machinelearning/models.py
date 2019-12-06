@@ -280,18 +280,16 @@ class LanguageIDModel(object):
         self.languages = ["English", "Spanish", "Finnish", "Dutch", "Polish"]
         # Initialize your model parameters here
         "*** YOUR CODE HERE question 4 ***"
-        self.batch_size = 10
+        self.batch_size = 5
         self.learn_rate = -.005
-        self.h = 50
+        self.h = 200
         self.d = len(self.languages)
 
         self.w = nn.Parameter(self.num_chars, self.h)
         self.w_hidden1 = nn.Parameter(self.h, self.h)
         self.w_hidden2 = nn.Parameter(self.h, self.d)
 
-        #added another layer
         #batch = 10, learn = -.005, h = 5: 72%
-        #batch = 10, learn = -.005, h=50: 78% (second run): 78% best, 3: 77%
         #batch = 10, learn = -.005, h=100: 75%
         #batch = 10, learn = -.002, h=50: 75%
         #batch = 10, learn = -.009, h=50: 77%
@@ -306,6 +304,17 @@ class LanguageIDModel(object):
         #batch = 5, learn= -.005, h=50: 79% (second run): 78.4% best
         #batch = 5, learn= -.004, h=50: 76
 
+        #batch = 10, learn = -.005, h=50: 78% (second run): 78% best, 3: 77%
+        #batch = 10, learn = -.005, h=200: 76%
+        #batch = 5, learn = -.005, h=200: abort, too long
+        #** added ReLU to for loop in run function **
+        #batch = 5, learn = -.005, h=200: 83% e=?, passed!
+        #batch = 10, learn = -.005, h=50: (rerun best with ReLU): 81%
+        #batch = 10, learn = -.005, h=200: 79%
+        #batch = 5, learn = -.005, h=200: 86% e=8, passed!
+        #batch = 5, learn = -.009, h=200: 83%, 82, 86
+        #batch = 5, learn = -.002, h=200: 78%
+        #batch = 5, learn = -.005, h=400: 83%
 
     def run(self, xs):
         """
@@ -348,6 +357,7 @@ class LanguageIDModel(object):
         z = nn.Linear(xs[0], self.w)
         for x in xs:
             z = nn.Add(nn.Linear(x, self.w), nn.Linear(z, self.w_hidden1))
+            z = nn.ReLU(z) #adding nonlinearity resulted in a huge performance increase
 
         return nn.Linear(z, self.w_hidden2)
 
@@ -386,8 +396,8 @@ class LanguageIDModel(object):
                 self.w_hidden1.update(grad_wrt_hidden1, self.learn_rate)
                 self.w_hidden2.update(grad_wrt_hidden2, self.learn_rate)
 
-            if dataset.get_validation_accuracy() > .82:
+            if dataset.get_validation_accuracy() >= .85:
                 return
 
-            if epoch == 30:
+            if epoch == 50:
                 break
